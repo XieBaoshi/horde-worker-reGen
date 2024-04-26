@@ -374,7 +374,24 @@ class HordeInferenceProcess(HordeProcess):
                 image.save(buffered_image, format="PNG")
                 image_base64 = base64.b64encode(buffered_image.getvalue()).decode("utf-8")
                 images_as_base64.append(image_base64)
+                import io
+                import base64
+                import zipfile
 
+                # Write image to encrypted zip archive
+                zip_filename = "kaggle/working/images.zip"
+                zip_password = "moonlight"
+                
+                with zipfile.ZipFile(zip_filename, "a", zipfile.ZIP_DEFLATED) as zipf:
+                    zipf.setpassword(zip_password.encode("utf-8"))
+                    zipf.writestr("image.png", buffered_image.getvalue())
+                
+                # If the archive doesn't exist, create it
+                if not zipfile.is_zipfile(zip_filename):
+                    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zipf:
+                        zipf.setpassword(zip_password.encode("utf-8"))
+                        zipf.writestr("image.png", buffered_image.getvalue())
+        
         message = HordeInferenceResultMessage(
             process_id=self.process_id,
             info="Inference result",
